@@ -176,7 +176,7 @@ def uypload_to_github(file_path, upload_dir):
 
 def upload_to_github(file_path, upload_dir, max_retries=3):
     """Upload a file to GitHub with retry mechanism for error 500."""
-    url = f"https://api.github.com/repos/{Config.GIT_UN}/{Config.GIT_REPO}/contents/{upload_dir}/{os.path.basename(file_path)}"
+    url = f"https://api.github.com/repos/{Config.GIT_UN}/{Config.GIT_REPO}/contents/TG/{upload_dir}/{os.path.basename(file_path)}"
 
     with open(file_path, "rb") as file:
         content = file.read()
