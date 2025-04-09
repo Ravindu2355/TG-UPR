@@ -1,9 +1,9 @@
 import os
 
 class Config(object):
-  API_ID = int(os.getenv("apiid",7322056))
+  API_ID = int(os.getenv("apiid",7323076))
   
-  API_HASH = os.getenv("apihash","89074aa74ed297150b3120914946db5c")
+  API_HASH = os.getenv("apihash","89074aa74ed297150b32091495c")
   
   BOT_TOKEN = os.getenv("token","7586819606:AAGW_cM_HcbcRlk7AmnAvQ8xXOMaa1aKwZE")
   
