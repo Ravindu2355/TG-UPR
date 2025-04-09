@@ -8,6 +8,8 @@ import ffmpeg
 import asyncio
 from config import Config
 from moviepy.editor import VideoFileClip
+from git_path import git_path
+
 
 last_msg = ""
 last_upt = 0
@@ -173,9 +175,13 @@ def uypload_to_github(file_path, upload_dir):
         return {"error": error_msg}
 
 
-def upload_to_github(file_path, upload_dir, max_retries=3):
+def upload_to_github(file_path, upload_dir, msg={}, max_retries=3):
     """Upload a file to GitHub with retry mechanism for error 500."""
-    url = f"https://api.github.com/repos/{Config.GIT_UN}/{Config.GIT_REPO}/contents/TG/{upload_dir}/{os.path.basename(file_path)}"
+    if msg:
+        user_path = git_path(msg.chat.id)
+        url = f"https://api.github.com/repos/{Config.GIT_UN}/{Config.GIT_REPO}/contents/TG/{user_path}/{upload_dir}/{os.path.basename(file_path)}"
+    else:
+        url = f"https://api.github.com/repos/{Config.GIT_UN}/{Config.GIT_REPO}/contents/TG/{upload_dir}/{os.path.basename(file_path)}"
 
     with open(file_path, "rb") as file:
         content = file.read()
@@ -242,7 +248,7 @@ async def to_git(video_path, msg, trs=None, extra=None):
         return
 
     # Upload m3u8 file
-    upload_result = upload_to_github(m3u8_file, video_name)
+    upload_result = upload_to_github(m3u8_file, video_name, msg)
     if "error" in upload_result:
         await msg.edit_text(f'{upload_result["error"]}\n{os.path.exists(m3u8_file)}')
         return
@@ -254,7 +260,7 @@ async def to_git(video_path, msg, trs=None, extra=None):
 
     for ts_file in ts_files:
         ts_file_path = os.path.join(ts_dir, ts_file)
-        upload_result = upload_to_github(ts_file_path, video_name)
+        upload_result = upload_to_github(ts_file_path, video_name, msg)
 
         if "error" in upload_result:
             await msg.edit_text(upload_result["error"])
@@ -268,7 +274,8 @@ async def to_git(video_path, msg, trs=None, extra=None):
 
     # Cleanup
     #lurl = f"https://github.com/{Config.GIT_UN}/{Config.GIT_REPO}/blob/{Config.GIT_BRANCH}/{m3u8_file}"
-    lurl = f"https://raw.githubusercontent.com/{Config.GIT_UN}/{Config.GIT_REPO}/refs/heads/{Config.GIT_BRANCH}/TG/{m3u8_file}"
+    upath= git_path(msg.chat.id)
+    lurl = f"https://raw.githubusercontent.com/{Config.GIT_UN}/{Config.GIT_REPO}/refs/heads/{Config.GIT_BRANCH}/TG/{upath}/{m3u8_file}"
     delete_dir(video_dir)
     await msg.edit_text(f"Upload completed!\n\nUrl: {lurl}")
     if os.path.exists(video_path):
