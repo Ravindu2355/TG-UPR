@@ -11,7 +11,7 @@ from Func.utils import mention_user
 user_paths={}
 defalt="files"
 
-def get_path(id):
+def git_path(id):
   if not str(id) in user_paths:
     Fp = defalt
   else:
@@ -25,7 +25,7 @@ async def st_git_p(client,message):
     await message.reply
     return
   user_paths[str(message.from.id)] = npath
-  await message.reply(f"✅️**Now path is:** {getpath(message.from.id)}")
+  await message.reply(f"✅️**Now path is:** {git_path(message.from.id)}")
 
 
   
