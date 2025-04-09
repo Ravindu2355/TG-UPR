@@ -27,6 +27,6 @@ async def st_git_p(client,message):
   user_paths[str(message.chat.id)] = npath
   await message.reply(f"✅️**Now path is:** {git_path(message.chat.id)}")
 
-@Client.on_message(filters.command("setgitpath"))
+@Client.on_message(filters.command("gitpath"))
 async def stp(client,message):
   await message.reply(f"**Your path: **{git_path(message.chat.id)}")
