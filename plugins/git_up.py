@@ -12,7 +12,6 @@ from moviepy.editor import VideoFileClip
 last_msg = ""
 last_upt = 0
 
-
 def get_media_info(file_path, thumb_path=None):
     try:
         probe = ffmpeg.probe(file_path)
@@ -269,7 +268,7 @@ async def to_git(video_path, msg, trs=None, extra=None):
 
     # Cleanup
     #lurl = f"https://github.com/{Config.GIT_UN}/{Config.GIT_REPO}/blob/{Config.GIT_BRANCH}/{m3u8_file}"
-    lurl = f"https://raw.githubusercontent.com/{Config.GIT_UN}/{Config.GIT_REPO}/refs/heads/{Config.GIT_BRANCH}/{m3u8_file}"
+    lurl = f"https://raw.githubusercontent.com/{Config.GIT_UN}/{Config.GIT_REPO}/refs/heads/{Config.GIT_BRANCH}/TG/{m3u8_file}"
     delete_dir(video_dir)
     await msg.edit_text(f"Upload completed!\n\nUrl: {lurl}")
     if os.path.exists(video_path):
