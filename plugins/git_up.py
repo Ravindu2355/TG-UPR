@@ -8,7 +8,7 @@ import ffmpeg
 import asyncio
 from config import Config
 from moviepy.editor import VideoFileClip
-from git_path import git_path
+from plugins.git_path import git_path
 
 
 last_msg = ""
