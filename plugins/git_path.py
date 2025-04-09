@@ -16,7 +16,7 @@ def get_path(id):
     Fp = defalt
   else:
     Fp = user_paths[str(id)]
-  return f"{id}/{Fp}/"
+  return f"{id}/{Fp}"
 
 @Client.on_message(filters.command("gitpath"))
 async def st_git_p(client,message):
