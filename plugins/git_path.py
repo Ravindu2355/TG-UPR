@@ -21,11 +21,11 @@ def git_path(id):
 @Client.on_message(filters.command("gitpath"))
 async def st_git_p(client,message):
   npath = message.text.split(" ")[1]
-  if not is_authorized(message.from.id):
+  if not is_authorized(message.chat.id):
     await message.reply
     return
-  user_paths[str(message.from.id)] = npath
-  await message.reply(f"✅️**Now path is:** {git_path(message.from.id)}")
+  user_paths[str(message.chat.id)] = npath
+  await message.reply(f"✅️**Now path is:** {git_path(message.chat.id)}")
 
 
   
