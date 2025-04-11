@@ -19,6 +19,8 @@ class Config(object):
 
   GIT_BRANCH = os.getenv("git_branch","main")
 
+  PixKey = os.getenv("pixkey","")
+  
   #TeraExScript = os.getenv("tscript")
 
   #PW =int(os.getenv("spw"))
