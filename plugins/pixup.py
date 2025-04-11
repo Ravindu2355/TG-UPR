@@ -1,8 +1,12 @@
 import os
 import time
 import requests
+import base64
 from pyrogram import Client, filters
 from pyrogram.types import Message
+from config import Config
+
+PIXELDRAIN_API_KEY = Config.PixKey
 
 # ====== Progress Utils ======
 async def progress_callback(current, total, message: Message, start_data, label="Progress"):
@@ -44,13 +48,13 @@ async def uupload_to_pixeldrain(app: Client, file_path, file_name, message: Mess
     except Exception as e:
         return {"success": False, "message": str(e)}
 
+
 async def upload_to_pixeldrain(app: Client, file_path, file_name, message: Message):
     time_data = {"start": time.time(), "last_update": time.time()}
     total_size = os.path.getsize(file_path)
 
     try:
         with open(file_path, "rb") as f:
-            # Wrap the file in a monitored read with progress
             class ProgressReader:
                 def __init__(self, file_obj):
                     self.file = file_obj
@@ -66,15 +70,22 @@ async def upload_to_pixeldrain(app: Client, file_path, file_name, message: Messa
                     return chunk
 
             monitored_file = ProgressReader(f)
+            headers = {
+                "Authorization": f"Basic {base64.b64encode((PIXELDRAIN_API_KEY + ':').encode()).decode()}"
+            }
+
             response = requests.post(
                 "https://pixeldrain.com/api/file",
-                files={"file": (file_name, monitored_file)}
+                files={"file": (file_name, monitored_file)},
+                headers=headers
             )
 
         return response.json()
 
     except Exception as e:
         return {"success": False, "message": str(e)}
+        
+
 
 # ====== Command Handler ======
 @Client.on_message(filters.command("pix") & filters.reply)
