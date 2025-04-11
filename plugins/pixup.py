@@ -108,11 +108,9 @@ async def pix_command_handler(client: Client, message: Message):
 
     try:
         file_path = await media.download(
-            progress=lambda cur, tot: client.loop.create_task(
-                progress_callback(cur, tot, status, time_data, "Downloading")
-            ),
-            progress_args=(status, time_data)
-        )
+    progress=lambda cur, tot: client.loop.create_task(
+        progress_callback(cur, tot, status, time_data, "Downloading")
+    ))
     except Exception as e:
         return await status.edit_text(f"Download failed: `{str(e)}`")
 
