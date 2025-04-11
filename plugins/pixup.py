@@ -70,8 +70,9 @@ async def upload_to_pixeldrain(app: Client, file_path, file_name, message: Messa
                     return chunk
 
             monitored_file = ProgressReader(f)
+            encodedK = base64.b64encode(f':{PIXELDRAIN_API_KEY}'.encode()).decode()
             headers = {
-                "Authorization": f"Basic {base64.b64encode((PIXELDRAIN_API_KEY + ':').encode()).decode()}"
+                "Authorization": f"Basic {encodedK}"
             }
 
             response = requests.post(
