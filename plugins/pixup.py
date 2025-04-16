@@ -7,6 +7,7 @@ from pyrogram.types import Message
 from config import Config
 import aiohttp
 import asyncio
+import json
 
 PIXELDRAIN_API_KEY = Config.PixKey
 
@@ -130,14 +131,18 @@ async def upload_to_pixeldrain(app: Client, file_path, file_name, message: Messa
                 data=reader,
                 headers=headers
             ) as response:
-                result = await response.json()
-        
+                text = await response.text()
+                try:
+                    result = json.loads(text)
+                except json.JSONDecodeError:
+                    result = {"success": False, "message": "Invalid response", "response_text": text}
+
         reader.close()
         return result
 
     except Exception as e:
         return {"success": False, "message": str(e)}
-        
+
 
 # ====== Command Handler ======
 @Client.on_message(filters.command("pix") & filters.reply)
