@@ -17,3 +17,4 @@ tqdm==4.62.3
 ffmpeg-python
 pymediainfo
 yt-dlp
+requests_toolbelt
