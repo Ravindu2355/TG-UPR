@@ -5,6 +5,8 @@ import base64
 from pyrogram import Client, filters
 from pyrogram.types import Message
 from config import Config
+import aiohttp
+import asyncio
 
 PIXELDRAIN_API_KEY = Config.PixKey
 
@@ -49,7 +51,7 @@ async def uupload_to_pixeldrain(app: Client, file_path, file_name, message: Mess
         return {"success": False, "message": str(e)}
 
 
-async def upload_to_pixeldrain(app: Client, file_path, file_name, message: Message):
+async def iupload_to_pixeldrain(app: Client, file_path, file_name, message: Message):
     time_data = {"start": time.time(), "last_update": time.time()}
     total_size = os.path.getsize(file_path)
 
@@ -87,7 +89,55 @@ async def upload_to_pixeldrain(app: Client, file_path, file_name, message: Messa
     except Exception as e:
         return {"success": False, "message": str(e)}
         
+#=====aiohttp=====
+async def upload_to_pixeldrain(app: Client, file_path, file_name, message: Message):
+    total_size = os.path.getsize(file_path)
+    time_data = {"start": time.time(), "last_update": time.time()}
+    api_key = os.getenv("ptk")
+    encoded_key = base64.b64encode(f":{api_key}".encode()).decode()
 
+    class AsyncProgressReader:
+        def __init__(self, file_path):
+            self.file = open(file_path, "rb")
+            self.sent = 0
+
+        async def read_chunk(self, size=65536):
+            chunk = self.file.read(size)
+            if chunk:
+                self.sent += len(chunk)
+                await progress_callback(self.sent, total_size, message, time_data, label="Uploading")
+            return chunk
+
+        async def __aiter__(self):
+            while True:
+                chunk = await self.read_chunk()
+                if not chunk:
+                    break
+                yield chunk
+
+        def close(self):
+            self.file.close()
+
+    try:
+        reader = AsyncProgressReader(file_path)
+        headers = {
+            "Authorization": f"Basic {encoded_key}"
+        }
+
+        async with aiohttp.ClientSession() as session:
+            async with session.put(
+                "https://pixeldrain.com/api/file/",
+                data=reader,
+                headers=headers
+            ) as response:
+                result = await response.json()
+        
+        reader.close()
+        return result
+
+    except Exception as e:
+        return {"success": False, "message": str(e)}
+        
 
 # ====== Command Handler ======
 @Client.on_message(filters.command("pix") & filters.reply)
