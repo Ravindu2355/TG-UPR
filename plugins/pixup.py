@@ -8,6 +8,7 @@ from config import Config
 import aiohttp
 import asyncio
 import json
+from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor
 
 PIXELDRAIN_API_KEY = Config.PixKey
 
@@ -51,8 +52,44 @@ async def uupload_to_pixeldrain(app: Client, file_path, file_name, message: Mess
     except Exception as e:
         return {"success": False, "message": str(e)}
 
+#fixTry=====
 
 async def upload_to_pixeldrain(app: Client, file_path, file_name, message: Message):
+    time_data = {"start": time.time(), "last_update": time.time()}
+    total_size = os.path.getsize(file_path)
+
+    try:
+        def create_callback(encoder):
+            def callback(monitor):
+                app.loop.create_task(progress_callback(
+                    monitor.bytes_read, total_size, message, time_data, label="Uploading"
+                ))
+            return callback
+
+        with open(file_path, "rb") as f:
+            encoder = MultipartEncoder(fields={
+                "file": (file_name, f, "application/octet-stream")
+            })
+
+            monitor = MultipartEncoderMonitor(encoder, create_callback(encoder))
+
+            headers = {
+                "Content-Type": monitor.content_type,
+                "Authorization": "Basic " + base64.b64encode(f':{PIXELDRAIN_API_KEY}'.encode()).decode()
+            }
+
+            response = requests.post(
+                "https://pixeldrain.com/api/file",
+                data=monitor,
+                headers=headers
+            )
+
+        return response.json()
+
+    except Exception as e:
+        return {"success": False, "message": str(e)}
+
+async def ooupload_to_pixeldrain(app: Client, file_path, file_name, message: Message):
     time_data = {"start": time.time(), "last_update": time.time()}
     total_size = os.path.getsize(file_path)
 
