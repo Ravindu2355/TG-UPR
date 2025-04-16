@@ -76,7 +76,7 @@ async def upload_to_pixeldrain(app: Client, file_path, file_name, message: Messa
             encodedK = base64.b64encode(f':{PIXELDRAIN_API_KEY}'.encode()).decode()
             ck=os.getenv("ptk")
             headers = {
-                "Authorization": f"Basic {ck}"
+                "Authorization": f"Basic {encodedK}"
             }
 
             response = requests.post(
