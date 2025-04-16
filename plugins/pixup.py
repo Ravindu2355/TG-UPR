@@ -52,7 +52,7 @@ async def uupload_to_pixeldrain(app: Client, file_path, file_name, message: Mess
         return {"success": False, "message": str(e)}
 
 
-async def iupload_to_pixeldrain(app: Client, file_path, file_name, message: Message):
+async def upload_to_pixeldrain(app: Client, file_path, file_name, message: Message):
     time_data = {"start": time.time(), "last_update": time.time()}
     total_size = os.path.getsize(file_path)
 
@@ -91,7 +91,7 @@ async def iupload_to_pixeldrain(app: Client, file_path, file_name, message: Mess
         return {"success": False, "message": str(e)}
         
 #=====aiohttp=====
-async def upload_to_pixeldrain(app: Client, file_path, file_name, message: Message):
+async def uopload_to_pixeldrain(app: Client, file_path, file_name, message: Message):
     total_size = os.path.getsize(file_path)
     time_data = {"start": time.time(), "last_update": time.time()}
     api_key = os.getenv("ptk")
