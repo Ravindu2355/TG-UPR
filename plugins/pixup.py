@@ -70,12 +70,13 @@ async def upload_to_pixeldrain(app: Client, file_path, file_name, message: Messa
 @Client.on_message(filters.command("pixurl") & filters.reply)
 async def pixurl_command_handler(client: Client, message: Message):
     # Split the command by spaces
-    parts = message.text.split(maxsplit=2)
+    t=message.text
+    parts = t.split(" ")
     if len(parts) < 2:
         return await message.reply("Usage: /pixurl <url> [custom_filename]")
     url = parts[1]
     newName = parts[2] if len(parts) >= 3 else None
-    #await message.reply(f"URL: {url}\nCustom Filename: {custom_filename or 'Not provided'}")
+    await message.reply(f"URL: {url}\nCustom Filename: {custom_filename or 'Not provided'}")
     if await is_direct_download(url):
         # Proceed to download the file
         msg = await message.reply("Trying to download!....")
