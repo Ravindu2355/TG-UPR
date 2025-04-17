@@ -5,11 +5,13 @@ from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, 
 from plugins.authers import is_authorized
 from plugins.tgup import upload_file
 from Func.downloader import dl
-from Func.utils import mention_user, generate_thumbnail, get_tg_filename
+from Func.utils import mention_user, generate_thumbnail, get_tg_filename, is_direct_download
 from log import logger as lg
 import aiohttp
 from sites.ext import run_extractor
 from Func.json_filehandle import save_json, get_json
+from plugins.pixup import pixurl_command_handler
+
 
 """
 @Client.on_message(filters.regex(r'https?://[^\s]+'))
@@ -39,6 +41,8 @@ async def handle_link(client, message):
 @Client.on_message(filters.regex(r'https?://[^\s]+'))
 async def handle_link(client, message):
     link = message.text
+    if "/pixurl" in link:
+      return await pixurl_command_handler(client,message)
     if "|" in link:
         link, newName = link.split("|")
     else:
@@ -100,26 +104,3 @@ async def handle_link(client, message):
         else:
           await msg.edit_text(f"**Error: {data['error']}")
         
-
-async def is_direct_download(url):
-    """Function to check if the URL is a direct download link."""
-    # List of common file extensions for download links (you can expand this as needed)
-    valid_extensions = ['.mp4', '.m3u8', '.jpg', '.png', '.zip', '.pdf', '.rar', '.txt']
-    
-    # Check if the URL ends with a valid file extension
-    if any(url.endswith(ext) for ext in valid_extensions):
-        return True
-    
-    # You can also perform an HTTP HEAD request to check if the URL points to a downloadable resource
-    async with aiohttp.ClientSession() as session:
-        try:
-            async with session.head(url) as response:
-                # If the response status is OK (200), and the content type is a file type (e.g., video, pdf)
-                if response.status == 200:
-                    content_type = response.headers.get('Content-Type', '')
-                    if 'application' in content_type or 'video' in content_type or 'audio' in content_type:
-                        return True
-        except Exception as e:
-            lg.info(f"Error checking direct download URL: {e}")
-    
-    return False
