@@ -9,6 +9,8 @@ import aiohttp
 import asyncio
 import json
 from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor
+from Func.downloader import dl
+from plugins.onlink import is_direct_download
 
 PIXELDRAIN_API_KEY = Config.PixKey
 
@@ -63,6 +65,39 @@ async def upload_to_pixeldrain(app: Client, file_path, file_name, message: Messa
         return response.json()
     except Exception as e:
         return {"success": False, "message": str(e)}
+
+#======== Url To Pix Up =====≈==
+@Client.on_message(filters.command("pixurl") & filters.reply)
+async def pixurl_command_handler(client: Client, message: Message):
+    # Split the command by spaces
+    parts = message.text.split(maxsplit=2)
+    if len(parts) < 2:
+        return await message.reply("Usage: /pixurl <url> [custom_filename]")
+    url = parts[1]
+    newName = parts[2] if len(parts) >= 3 else None
+    #await message.reply(f"URL: {url}\nCustom Filename: {custom_filename or 'Not provided'}")
+    if await is_direct_download(url):
+        # Proceed to download the file
+        msg = await message.reply("Trying to download!....")
+        dl_file = await dl(url=url, msg=msg, custom_filename=newName)
+        if dl_file and not "error" in dl_file:
+            file_path = dl_file['file_path']
+            file_name = dl_file['filename']
+            res = await upload_to_pixeldrain(client, file_path, file_name, msg)
+            if res.get("success"):
+                await msg.edit_text(f"**Upload complete!**\n\n**Link:** https://pixeldrain.com/u/{res['id']}")
+            else:
+                await msg.edit_text(f"Upload failed: `{res.get('message')}`")  
+        else:
+            await msg.edit_text(f"Error on download...{dl_file['error']}")
+    else:
+        await message.reply("**This only supprot for direct links...**")
+        return
+    try:
+        os.remove(file_path)
+    except:
+        pass
+
 
 
 
