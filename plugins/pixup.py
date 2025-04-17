@@ -76,7 +76,7 @@ async def pixurl_command_handler(client: Client, message: Message):
         return await message.reply("Usage: /pixurl <url> [custom_filename]")
     url = parts[1]
     newName = parts[2] if len(parts) >= 3 else None
-    await message.reply(f"URL: {url}\nCustom Filename: {custom_filename or 'Not provided'}")
+    await message.reply(f"URL: {url}\nCustom Filename: {newName or 'Not provided'}")
     if await is_direct_download(url):
         # Proceed to download the file
         msg = await message.reply("Trying to download!....")
