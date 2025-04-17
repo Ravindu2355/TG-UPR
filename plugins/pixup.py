@@ -1,5 +1,5 @@
 import os
-import time
+import time, random
 import requests
 import base64
 from pyrogram import Client, filters
@@ -30,34 +30,10 @@ async def progress_callback(current, total, message: Message, start_data, label=
         except Exception:
             pass
 
-# ====== PixelDrain Upload Function ======
-async def uupload_to_pixeldrain(app: Client, file_path, file_name, message: Message):
-    time_data = {"start": time.time(), "last_update": time.time()}
-    total_size = os.path.getsize(file_path)
-
-    def file_gen():
-        with open(file_path, "rb") as f:
-            sent = 0
-            while chunk := f.read(1024 * 1024):
-                sent += len(chunk)
-                app.loop.create_task(progress_callback(sent, total_size, message, time_data, label="Uploading"))
-                yield chunk
-
-    try:
-        response = requests.post(
-            "https://pixeldrain.com/api/file",
-            files={"file": (file_name, file_gen())}
-        )
-        return response.json()
-    except Exception as e:
-        return {"success": False, "message": str(e)}
-
-#fixTry=====
 
 async def upload_to_pixeldrain(app: Client, file_path, file_name, message: Message):
     time_data = {"start": time.time(), "last_update": time.time()}
     total_size = os.path.getsize(file_path)
-
     try:
         def create_callback(encoder):
             def callback(monitor):
@@ -85,100 +61,9 @@ async def upload_to_pixeldrain(app: Client, file_path, file_name, message: Messa
             )
 
         return response.json()
-
     except Exception as e:
         return {"success": False, "message": str(e)}
 
-async def ooupload_to_pixeldrain(app: Client, file_path, file_name, message: Message):
-    time_data = {"start": time.time(), "last_update": time.time()}
-    total_size = os.path.getsize(file_path)
-
-    try:
-        with open(file_path, "rb") as f:
-            class ProgressReader:
-                def __init__(self, file_obj):
-                    self.file = file_obj
-                    self.sent = 0
-
-                def read(self, size=-1):
-                    chunk = self.file.read(size)
-                    if chunk:
-                        self.sent += len(chunk)
-                        app.loop.create_task(progress_callback(
-                            self.sent, total_size, message, time_data, label="Uploading"
-                        ))
-                    return chunk
-
-            monitored_file = ProgressReader(f)
-            encodedK = base64.b64encode(f':{PIXELDRAIN_API_KEY}'.encode()).decode()
-            ck=os.getenv("ptk")
-            headers = {
-                "Authorization": f"Basic {encodedK}"
-            }
-
-            response = requests.post(
-                "https://pixeldrain.com/api/file",
-                files={"file": (file_name, monitored_file)},
-                headers=headers
-            )
-
-        return response.json()
-
-    except Exception as e:
-        return {"success": False, "message": str(e)}
-        
-#=====aiohttp=====
-async def uopload_to_pixeldrain(app: Client, file_path, file_name, message: Message):
-    total_size = os.path.getsize(file_path)
-    time_data = {"start": time.time(), "last_update": time.time()}
-    api_key = os.getenv("ptk")
-    encoded_key = base64.b64encode(f":{api_key}".encode()).decode()
-
-    class AsyncProgressReader:
-        def __init__(self, file_path):
-            self.file = open(file_path, "rb")
-            self.sent = 0
-
-        async def read_chunk(self, size=65536):
-            chunk = self.file.read(size)
-            if chunk:
-                self.sent += len(chunk)
-                await progress_callback(self.sent, total_size, message, time_data, label="Uploading")
-            return chunk
-
-        async def __aiter__(self):
-            while True:
-                chunk = await self.read_chunk()
-                if not chunk:
-                    break
-                yield chunk
-
-        def close(self):
-            self.file.close()
-
-    try:
-        reader = AsyncProgressReader(file_path)
-        headers = {
-            "Authorization": f"Basic {encoded_key}"
-        }
-
-        async with aiohttp.ClientSession() as session:
-            async with session.put(
-                "https://pixeldrain.com/api/file/",
-                data=reader,
-                headers=headers
-            ) as response:
-                text = await response.text()
-                try:
-                    result = json.loads(text)
-                except json.JSONDecodeError:
-                    result = {"success": False, "message": "Invalid response", "response_text": text}
-
-        reader.close()
-        return result
-
-    except Exception as e:
-        return {"success": False, "message": str(e)}
 
 
 # ====== Command Handler ======
@@ -195,7 +80,14 @@ async def pix_command_handler(client: Client, message: Message):
         media.audio.file_name if media.audio else
         "voice_note.ogg"
     )
-
+    random_str = str(random.randint(1000000000, 9999999999))
+    if not file_name:
+        file_name = (
+        f"video_{random_str}.mp4" if media.video else
+        f"doc_{random_str}.text" if media.document else
+        f"audio_{random_str}.mp3" if media.audio else
+        "voice_note.ogg"
+        )
     status = await message.reply(f"Downloading `{file_name}`...")
     time_data = {"start": time.time(), "last_update": time.time()}
 
