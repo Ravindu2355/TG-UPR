@@ -10,7 +10,7 @@ import asyncio
 import json
 from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor
 from Func.downloader import dl
-from plugins.onlink import is_direct_download
+from Func.utils import is_direct_download
 
 PIXELDRAIN_API_KEY = Config.PixKey
 
