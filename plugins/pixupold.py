@@ -67,7 +67,7 @@ async def upload_to_pixeldrain(app: Client, file_path, file_name, message: Messa
         return {"success": False, "message": str(e)}
 
 #======== Url To Pix Up =====≈==
-@Client.on_message(filters.command("pixurl"))
+@Client.on_message(filters.command("pixurlold"))
 async def pixurl_command_handler(client: Client, message: Message):
     # Split the command by spaces
     t=message.text
@@ -103,7 +103,7 @@ async def pixurl_command_handler(client: Client, message: Message):
 
 
 # ====== Command Handler ======
-@Client.on_message(filters.command("pix") & filters.reply)
+@Client.on_message(filters.command("pixold") & filters.reply)
 async def pix_command_handler(client: Client, message: Message):
     media = message.reply_to_message
 
