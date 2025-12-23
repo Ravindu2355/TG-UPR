@@ -48,10 +48,12 @@ async def progress_update(uploaded, total, msg, start_data, label="⬆️ Upload
 async def upload_to_facebook(file_path, title, desc, published, msg: Message):
     token = Config.FB_PAGE_TOKEN
     page_id = Config.FB_PAGE_ID
-
+    
     size = os.path.getsize(file_path)
     time_data = {"start": time.time(), "last": time.time()}
     uploaded = 0
+
+    stres = {}
 
     async with aiohttp.ClientSession() as session:
 
@@ -66,6 +68,7 @@ async def upload_to_facebook(file_path, title, desc, published, msg: Message):
             }
         ) as r:
             start_res = await r.json()
+            stres = start_res
 
         if "error" in start_res:
             raise Exception(start_res["error"]["message"])
@@ -121,6 +124,8 @@ async def upload_to_facebook(file_path, title, desc, published, msg: Message):
         if "error" in finish_res:
             raise Exception(finish_res["error"]["message"])
 
+        if not finish_res.get("video_id"):
+            return stres
         return finish_res
 
 
