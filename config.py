@@ -20,6 +20,10 @@ class Config(object):
   GIT_BRANCH = os.getenv("git_branch","main")
 
   PixKey = os.getenv("pixkey","")
+
+  FB_PAGE_ID = os.getenv("fbpageid","")
+
+  FB_PAGE_TOKEN = os.getenv("fbpagetk","")
   
   #TeraExScript = os.getenv("tscript")
 
