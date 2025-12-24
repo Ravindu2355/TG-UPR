@@ -24,7 +24,18 @@ class Config(object):
   FB_PAGE_ID = os.getenv("fbpageid","")
 
   FB_PAGE_TOKEN = os.getenv("fbpagetk","")
+
+  FB_USER_TOKEN = os.getenv("fbusertk","")
+
+  FB_GROUP_ID = os.getenv("fbgroupid","")
   
   #TeraExScript = os.getenv("tscript")
 
   #PW =int(os.getenv("spw"))
+
+
+
+
+
+
+
