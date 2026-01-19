@@ -231,10 +231,10 @@ def delete_dir(directory):
 
 async def to_git(video_path, msg, trs=None, extra=None):
     video_name = os.path.splitext(os.path.basename(video_path))[0]
-    video_dir = f"{video_name}"
     match = re.match(r"/git\s+(.+)", msg.text)
     if match:
-        video_dir = match.group(1).strip()  # Use the custom name
+        video_name = match.group(1).strip()  # Use the custom name
+    video_dir = f"{video_name}"
 
     #await msg.reply(f"Processing: {video_path}")
     # Convert video to HLS
