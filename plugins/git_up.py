@@ -8,8 +8,8 @@ import ffmpeg
 import asyncio
 from config import Config
 from moviepy.editor import VideoFileClip
-from plugins.git_path import git_path
-
+from plugins.git_path import git_path, git_repo
+from urllib.parse import quote
 
 last_msg = ""
 last_upt = 0
@@ -179,7 +179,8 @@ def upload_to_github(file_path, upload_dir, msg={}, max_retries=3):
     """Upload a file to GitHub with retry mechanism for error 500."""
     if msg:
         user_path = git_path(msg.chat.id)
-        url = f"https://api.github.com/repos/{Config.GIT_UN}/{Config.GIT_REPO}/contents/TG/{user_path}/{upload_dir}/{os.path.basename(file_path)}"
+        repo_name = git_repo(msg.chat.id) or Config.GIT_REPO
+        url = f"https://api.github.com/repos/{Config.GIT_UN}/{repo_name}/contents/TG/{user_path}/{upload_dir}/{os.path.basename(file_path)}"
     else:
         url = f"https://api.github.com/repos/{Config.GIT_UN}/{Config.GIT_REPO}/contents/TG/{upload_dir}/{os.path.basename(file_path)}"
 
@@ -275,7 +276,8 @@ async def to_git(video_path, msg, trs=None, extra=None):
     # Cleanup
     #lurl = f"https://github.com/{Config.GIT_UN}/{Config.GIT_REPO}/blob/{Config.GIT_BRANCH}/{m3u8_file}"
     upath= git_path(msg.chat.id)
-    lurl = f"https://raw.githubusercontent.com/{Config.GIT_UN}/{Config.GIT_REPO}/refs/heads/{Config.GIT_BRANCH}/TG/{upath}/{m3u8_file}"
+    en_m3u8 = quote(m3u8_file)
+    lurl = f"https://raw.githubusercontent.com/{Config.GIT_UN}/{Config.GIT_REPO}/refs/heads/{Config.GIT_BRANCH}/TG/{upath}/{en_m3u8}"
     delete_dir(video_dir)
     await msg.edit_text(f"Upload completed!\n\nUrl: {lurl}")
     if os.path.exists(video_path):
