@@ -64,6 +64,14 @@ async def rename_file(client, message: Message):
     await status.edit_text("⬆️ Uploading renamed file...")
 
     # Upload (reuse your uploader)
+    if ".mp4" in new_name:
+        return await upload_file(
+          client=client,
+          chat_id=message.chat.id,
+          file_path=new_path,
+          msg=status,
+          as_document=False  # safest for all file types
+       )
     await upload_file(
         client=client,
         chat_id=message.chat.id,
