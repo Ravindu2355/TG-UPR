@@ -4,7 +4,7 @@ from pyrogram import Client, filters
 from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto
 from plugins.authers import is_authorized
 from plugins.tgdw import download_file
-from plugins.git_up import to_git
+from plugins.tgup import upload_file
 
 download_dir = "/forRename"
 if not os.path.exists(download_dir):
