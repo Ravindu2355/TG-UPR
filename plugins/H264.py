@@ -5,6 +5,7 @@ from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, 
 from plugins.authers import is_authorized
 from plugins.tgdw import download_file
 from plugins.tgup import upload_file
+from plugins.git_up import get_media_info
 
 download_dir = "/forH264"
 if not os.path.exists(download_dir):
