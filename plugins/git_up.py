@@ -279,8 +279,9 @@ async def to_git(video_path, msg, trs=None, extra=None):
     # Cleanup
     #lurl = f"https://github.com/{Config.GIT_UN}/{Config.GIT_REPO}/blob/{Config.GIT_BRANCH}/{m3u8_file}"
     upath= git_path(msg.chat.id)
+    repo_name = git_repo(msg.chat.id) or Config.GIT_REPO
     en_m3u8 = quote(m3u8_file)
-    lurl = f"https://raw.githubusercontent.com/{Config.GIT_UN}/{Config.GIT_REPO}/refs/heads/{Config.GIT_BRANCH}/TG/{upath}/{en_m3u8}"
+    lurl = f"https://raw.githubusercontent.com/{Config.GIT_UN}/{repo_name}/refs/heads/{Config.GIT_BRANCH}/TG/{upath}/{en_m3u8}"
     delete_dir(video_dir)
     await msg.edit_text(f"Upload completed!\n\nUrl: {lurl}")
     if os.path.exists(video_path):
