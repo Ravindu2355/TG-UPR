@@ -1,21 +1,38 @@
-import re, os, asyncio
+import re
+import os
+import asyncio
 import time
+
 from pyrogram import Client, filters
-from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, InputMediaPhoto
+from pyrogram.types import Message
+
 from plugins.authers import is_authorized
 from plugins.tgdw import download_file
 from plugins.tgup import upload_file
 from plugins.git_up import get_media_info
 
 download_dir = "/forH264"
-if not os.path.exists(download_dir):
-    os.makedirs(download_dir)
+os.makedirs(download_dir, exist_ok=True)
+
+
+async def safe_edit(msg: Message, text: str, delay=5):
+    """
+    Edit message safely (prevents FloodWait & edit spam)
+    """
+    now = time.time()
+    last = getattr(msg, "_last_edit", 0)
+
+    if now - last >= delay:
+        try:
+            await msg.edit_text(text)
+            msg._last_edit = now
+        except Exception:
+            pass
 
 
 async def convert_to_h264(input_video_path, output_dir, msg):
     """
-    Convert video (H.265 / MKV / etc.) to H.264 MP4
-    with real-time FFmpeg progress updates.
+    Convert video to H.264 MP4 with SAFE FFmpeg progress parsing
     """
 
     await msg.edit_text("🔄 Starting H.264 conversion...")
@@ -35,59 +52,62 @@ async def convert_to_h264(input_video_path, output_dir, msg):
         "-y",
         "-i", input_video_path,
 
-        # VIDEO → H.264
+        # Video
         "-c:v", "libx264",
-        "-preset", "ultrafast",     # very fast, low CPU
+        "-preset", "ultrafast",
         "-profile:v", "main",
         "-level", "4.0",
-        "-pix_fmt", "yuv420p",      # required for compatibility
+        "-pix_fmt", "yuv420p",
         "-movflags", "+faststart",
 
-        # AUDIO (copy if possible, else AAC)
+        # Audio
         "-c:a", "aac",
         "-b:a", "128k",
+
+        # Progress
+        "-progress", "pipe:1",
+        "-nostats",
 
         output_file
     ]
 
     process = await asyncio.create_subprocess_exec(
         *cmd,
-        stdout=asyncio.subprocess.DEVNULL,
-        stderr=asyncio.subprocess.PIPE
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.DEVNULL
     )
 
-    last_percent = 0
+    last_percent = -1
 
     while True:
-        line = await process.stderr.readline()
+        line = await process.stdout.readline()
         if not line:
             break
 
-        text = line.decode(errors="ignore")
+        text = line.decode(errors="ignore").strip()
 
-        match = re.search(r"time=(\d+):(\d+):([\d.]+)", text)
-        if match:
-            h, m, s = map(float, match.groups())
-            elapsed = h * 3600 + m * 60 + s
-            percent = min((elapsed / total_duration) * 100, 100)
+        if text.startswith("out_time_ms="):
+            out_time_ms = int(text.split("=")[1])
+            elapsed = out_time_ms / 1_000_000
+            percent = min(int((elapsed / total_duration) * 100), 100)
 
-            # update only if changed (prevents flood)
-            if int(percent) != last_percent:
-                last_percent = int(percent)
-                await u_msg(
+            if percent != last_percent:
+                last_percent = percent
+                await safe_edit(
                     msg,
                     f"🎬 H.264 Converting...\n"
-                    f"📊 Progress: {percent:.2f}%"
+                    f"📊 Progress: {percent}%"
                 )
 
     await process.wait()
 
-    if not os.path.exists(output_file):
+    if process.returncode != 0 or not os.path.exists(output_file):
         await msg.edit_text("❌ Conversion failed.")
         return None
 
     await msg.edit_text("✅ H.264 conversion completed!")
     return output_file
+
 
 @Client.on_message(filters.command("h264"))
 async def h264_convert(client, message: Message):
@@ -96,49 +116,43 @@ async def h264_convert(client, message: Message):
         return
 
     if not is_authorized(message.chat.id):
-        await message.reply("**❌️You are not authorized to use me!❌️**")
+        await message.reply("❌ You are not authorized to use this bot.")
         return
 
     v_msg = message.reply_to_message
 
-    # Fallback filename safety
-    if v_msg.video.file_name:
-        input_name = v_msg.video.file_name
-    else:
-        input_name = f"{v_msg.video.file_id}.mp4"
-
-    input_path = os.path.join(download_dir, input_name)
+    input_name = (
+        v_msg.video.file_name
+        if v_msg.video.file_name
+        else f"{v_msg.video.file_id}.mp4"
+    )
 
     msg = await message.reply("⬇️ Downloading video...")
 
-    # Download video
     file_path = await download_file(client, v_msg, download_dir, msg)
     if not file_path or not os.path.exists(file_path):
         await msg.edit_text("❌ Download failed.")
         return
 
-    # Convert to H.264
     output_file = await convert_to_h264(
         input_video_path=file_path,
         output_dir=download_dir,
         msg=msg
     )
 
-    # Remove original file after conversion
     try:
         os.remove(file_path)
     except Exception:
         pass
 
-    if not output_file or not os.path.exists(output_file):
+    if not output_file:
         await msg.edit_text("❌ H.264 conversion failed.")
         return
 
-    # Upload converted file
     await upload_file(
         client=client,
         chat_id=message.chat.id,
         file_path=output_file,
         msg=msg,
-        as_document=False  # uploads as streamable video
-    )
+        as_document=False
+        )
