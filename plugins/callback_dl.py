@@ -30,6 +30,8 @@ async def handle_callback(client, callback_query):
     link = json_data["links"][mk][k]
     if ".mp4" in link and "H" in mk:
         mk = "mp4"
+    if "m3u8" in link or "m3u8" in mk:
+        mk = "mp4"
     newName = f"{json_data['name']}.{mk}"
     dl_file = await dl(url=link, msg=msg, custom_filename=newName)
     if dl_file and not "error" in dl_file:
