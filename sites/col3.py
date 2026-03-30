@@ -86,7 +86,7 @@ def extract(url):
     json = {
         "name":metadata.get("title"),
         "thumbnail":metadata["thumbnails"]["1080"],
-        "description":"No Data!"
+        "description":"No Data!",
         "links":{
             "m3u8":{}
         },
