@@ -6,6 +6,7 @@ import urllib.parse
 EXTRACTORS = {
     'spankbang.com': 'sites.spbank',
     'eporner': 'sites.epr',
+    'col3neg': 'sites.col3'
 }
 
 def get_domain(url):
