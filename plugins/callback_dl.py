@@ -4,6 +4,7 @@ from Func.json_filehandle import save_json, get_json, delete_json
 from plugins.tgup import upload_file
 from Func.downloader import dl
 import os
+from log import logger as lg
 
 @Client.on_callback_query(filters.regex(r'ext_'))
 async def handle_callback(client, callback_query):
