@@ -82,15 +82,19 @@ def extract(url):
 
     print("🔍 Fetching metadata...")
     metadata = get_metadata(video_id)
+
+    if "error" in metadata:
+        er = metadata.get("error",{})
+        return {"error": f"Err: {er.get("code")}\nErr: {er.get("message")}" }
     
     json = {
         "name":metadata.get("title"),
-        "thumbnail":metadata["thumbnails"]["1080"],
+        "thumbnail":metadata.get("thumbnails",{}).get("1080"),
         "description":"No Data!",
         "links":{
             "m3u8":{}
         },
-        "duration":metadata["duration"]
+        "duration":metadata.get("duration")
     }
     
     m3u8_url = get_m3u8_url(metadata)
@@ -101,7 +105,7 @@ def extract(url):
 
     if not qualities:
         print("❄1�7 No qualities found")
-        return
+        return {"error": f"Selection error: ❄1�7 No qualities found"}
 
     print("\nAvailable qualities:")
     for q in qualities:
