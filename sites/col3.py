@@ -20,8 +20,21 @@ def get_video_id(url):
     return url.split("/")[-1]
 
 def get_metadata(video_id):
+    headers = {
+      "Accept": "*/*",
+      "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
+      "Sec-CH-UA": "\"Chromium\";v=\"107\", \"Not=A?Brand\";v=\"24\"",
+      "Sec-CH-UA-Mobile": "?1",
+      "Sec-CH-UA-Platform": "\"Android\"",
+      "Sec-Fetch-Dest": "empty",
+      "Sec-Fetch-Mode": "cors",
+      "Sec-Fetch-Site": "same-site",
+      "Referer": "https://geo.dailymotion.com/",
+      "Origin": "https://geo.dailymotion.com",
+      "User-Agent": "Mozilla/5.0 (Linux; Android 11; CPH2001) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Mobile Safari/537.36"
+    }
     api = f"https://www.dailymotion.com/player/metadata/video/{video_id}?embedder=https%3A%2F%2Fwww.dailymotion.com%2Fvideo%2F{video_id}&geo=1&is_native_app=0&app=com.dailymotion.neon&client_type=webapp"
-    return requests.get(api).json()
+    return requests.get(api,headers= headers).json()
 
 def get_m3u8_url(metadata):
     return metadata["qualities"]["auto"][0]["url"]
@@ -85,7 +98,7 @@ def extract(url):
 
     if "error" in metadata:
         er = metadata.get("error",{})
-        return {"error": f"Err: {er.get("code")}\nErr: {er.get("message")}" }
+        return {"error": f"Err: {er.get('code')}\nErr: {er.get('message')}" }
     
     json = {
         "name":metadata.get("title"),
