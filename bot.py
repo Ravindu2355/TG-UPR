@@ -3,6 +3,15 @@ import time
 from pyrogram import Client, filters
 from pyrogram.types import Message
 from config import Config
+import sys
+
+# 🔥 Replace tgcrypto with cipheron
+import cipheron
+sys.modules['tgcrypto'] = cipheron
+
+# 🚀 Faster async loop (Linux only – Koyeb OK)
+import uvloop
+uvloop.install()
 
 # Environment variables
 API_ID = Config.API_ID
