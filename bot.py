@@ -1,9 +1,3 @@
-import sys
-
-# 🔥 Replace tgcrypto with cipheron
-import cipheron
-sys.modules['tgcrypto'] = cipheron
-
 import os
 import time
 from pyrogram import Client, filters
