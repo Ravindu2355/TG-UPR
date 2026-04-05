@@ -12,7 +12,14 @@ OWNER = Config.OWNER
 
 # Initialize Pyrogram client
 plugins = dict(root="plugins")
-app = Client("rvx_tguper_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN,plugins=plugins)
+app = Client(
+  "rvx_tguper_bot",
+  api_id=API_ID,
+  api_hash=API_HASH,
+  bot_token=BOT_TOKEN,
+  plugins=plugins,
+  workers=8
+)
 
 # Run the bot
 app.run()
